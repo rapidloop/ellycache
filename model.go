@@ -33,7 +33,7 @@ import (
 )
 
 type Config struct {
-	Listen     string           `hcl:"listen"`
+	Listen     string           `hcl:"listen,optional"`
 	Connection ConnectionConfig `hcl:"connection,block"`
 	Endpoints  []EndpointConfig `hcl:"endpoint,block"`
 }
@@ -58,8 +58,8 @@ func (c *Config) Validate() error {
 
 type ConnectionConfig struct {
 	DSN         string `hcl:"dsn"`
-	MaxConns    int    `hcl:"maxconns"`
-	IdleTimeout string `hcl:"idletimeout"`
+	MaxConns    int    `hcl:"maxconns,optional"`
+	IdleTimeout string `hcl:"idletimeout,optional"`
 }
 
 func (c *ConnectionConfig) Validate() error {
@@ -80,10 +80,10 @@ func (c *ConnectionConfig) Validate() error {
 type EndpointConfig struct {
 	Path       string `hcl:"path,label"`
 	SQL        string `hcl:"sql"`
-	SQLTimeout string `hcl:"sqltimeout"`
+	SQLTimeout string `hcl:"sqltimeout,optional"`
 	Schedule   string `hcl:"schedule"`
-	RowFormat  string `hcl:"rowformat"`
-	FileBacked bool   `hcl:"filebacked"`
+	RowFormat  string `hcl:"rowformat,optional"`
+	FileBacked bool   `hcl:"filebacked,optional"`
 }
 
 var rxURI = regexp.MustCompile(`^(/(({[A-Za-z0-9_.-]+})|([A-Za-z0-9_.-]+)))+$`)

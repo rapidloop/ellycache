@@ -27,6 +27,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -64,7 +65,10 @@ var (
 	cache    sync.Map       // the cache
 )
 
-const defaultMaxConns = 5 // default value for 'maxconns' in config
+const (
+	defaultListen   = ":8080" // default value for 'listen' in config
+	defaultMaxConns = 5       // default value for 'maxconns' in config
+)
 
 func printUsage(r io.Writer) {
 	fmt.Fprintf(os.Stderr, `Usage: ellycache [-e] [-v] [-h] [config-file]
@@ -172,8 +176,12 @@ func realmain() int {
 	handler := handlers.CompressHandler(mux)
 
 	// start an http server
+	listen := strings.TrimSpace(cfg.Listen)
+	if listen == "" {
+		listen = defaultListen
+	}
 	srv := &http.Server{
-		Addr:    cfg.Listen,
+		Addr:    listen,
 		Handler: handler,
 	}
 	if err := srv.ListenAndServe(); err != nil {
