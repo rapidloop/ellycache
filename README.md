@@ -96,8 +96,9 @@ Array-of-array JSON format is also supported for less verbose response.
 ### Installation
 
 ellycache is a single, self-contained, zero-dependency binary. You can download
-the latest release from the [releases](TODO) page. If you have a working recent
-Go toolchain installed, you can also build it yourself:
+the latest release from the [releases](https://github.com/rapidloop/ellycache/releases)
+page. If you have a working recent Go toolchain installed, you can also build
+it yourself:
 
 ```shell
 $ go install github.com/rapidloop/ellycache@latest
