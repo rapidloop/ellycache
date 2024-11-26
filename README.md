@@ -46,7 +46,7 @@ ORDER BY
 	title
 EOLATE
 
-	schedule = "*/5 * * * *"  # cron schedule for running the query 
+	schedule = "*/5 * * * *"  # cron schedule for running the query
 	rowformat = "object"      # HTTP json body is an array of objects
 	filebacked = true         # cache results in an encrypted temp file
 }
@@ -152,8 +152,7 @@ starting point and documentation.
 
 ellycache is a single static binary with no dependencies. You can deploy it into
 VMs or containers or even bundle it with your apps easily. It is written in
-pure Go, and can be built for any platform that [Go supports]
-(https://go.dev/wiki/MinimumRequirements).
+pure Go, and can be built for any platform that [Go supports](https://go.dev/wiki/MinimumRequirements).
 
 #### PostgreSQL connection pooling
 
@@ -174,7 +173,7 @@ file can decrypt them, and if that process crashes, then no one can.
 ### Support
 
 ellycache is an open-source project from [RapidLoop]
-(https://rapidloop.com) , the makers of [pgDash](https://pgdash.io]). It is
+(https://rapidloop.com) , the makers of [pgDash](https://pgdash.io). It is
 currently hosted at [GitHub](https://github.com/rapidloop/ellycache). Community
 support is available via [discussions](https://github.com/rapidloop/ellycache/discussions).
 Feel free to [raise issues you encounter](https://github.com/rapidloop/ellycache/issues) or
