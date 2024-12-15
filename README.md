@@ -172,10 +172,11 @@ file can decrypt them, and if that process crashes, then no one can.
 
 ### Support
 
-ellycache is an open-source project from [RapidLoop]
-(https://rapidloop.com) , the makers of [pgDash](https://pgdash.io). It is
+ellycache is an open-source project from [RapidLoop](https://rapidloop.com),
+the makers of [pgDash](https://pgdash.io). It is
 currently hosted at [GitHub](https://github.com/rapidloop/ellycache). Community
-support is available via [discussions](https://github.com/rapidloop/ellycache/discussions).
+support is available via
+[discussions](https://github.com/rapidloop/ellycache/discussions).
 Feel free to [raise issues you encounter](https://github.com/rapidloop/ellycache/issues) or
 [discuss improvements](https://github.com/rapidloop/ellycache/discussions). For
 paid support or custom features for ellycache, do [contact us](mailto:hello@rapidloop.com).
