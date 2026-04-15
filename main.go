@@ -268,10 +268,12 @@ func makeResult(e *EndpointConfig) (*EndpointResult, error) {
 		if f, err := os.CreateTemp("", "ellycache"); err != nil {
 			return nil, fmt.Errorf("failed to create temp file: %v", err)
 		} else {
-			defer f.Close()
 			w := symmecrypt.NewWriter(f, cryptKey)
-			defer w.Close()
-			if h, err := query(e, w); err != nil {
+			h, err := query(e, w)
+			w.Close()
+			f.Close()
+			if err != nil {
+				os.Remove(f.Name())
 				return nil, err
 			} else {
 				return &EndpointResult{ETag: fmt.Sprintf(`W/"%x"`, h), File: f.Name()}, nil
