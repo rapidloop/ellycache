@@ -27,8 +27,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/cespare/xxhash/v2"
@@ -68,6 +70,7 @@ var (
 const (
 	defaultListen   = ":8080" // default value for 'listen' in config
 	defaultMaxConns = 5       // default value for 'maxconns' in config
+	shutdownTimeout = 10 * time.Second
 )
 
 func printUsage(r io.Writer) {
@@ -187,9 +190,27 @@ func realmain() int {
 		Addr:    listen,
 		Handler: handler,
 	}
-	if err := srv.ListenAndServe(); err != nil {
+	errch := make(chan error, 1)
+	go func() {
+		errch <- srv.ListenAndServe()
+	}()
+	log.Printf("http: starting http server on %s", listen)
+
+	// wait for server error or interrupt
+	sigch := make(chan os.Signal, 1)
+	signal.Notify(sigch, os.Interrupt, syscall.SIGTERM)
+	select {
+	case err := <-errch:
 		if !errors.Is(err, http.ErrServerClosed) {
-			fmt.Fprintf(os.Stderr, "ellycache: http server error: %v\n", err)
+			log.Printf("http: server error: %v", err)
+			return 1
+		}
+	case sig := <-sigch:
+		log.Printf("received signal %s, shutting down within %v", sig, shutdownTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Printf("http: server shutdown error: %v", err)
 			return 1
 		}
 	}
