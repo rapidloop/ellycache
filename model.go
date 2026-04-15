@@ -133,7 +133,6 @@ func ConfigFromFile(filename string) (*Config, error) {
 type EndpointResult struct {
 	QueriedAt    string // as a string to avoid formatting each time
 	CacheControl string
-	ValidUntil   time.Time
 	ETag         string
 	Result       []byte
 	File         string // if not empty, result is in this file

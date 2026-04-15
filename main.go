@@ -325,7 +325,7 @@ func query(e *EndpointConfig, w io.Writer) (uint64, error) {
 	}
 
 	first := true
-	fmt.Fprintln(w, "[")
+	io.WriteString(w, "[\n")
 	for rows.Next() {
 		values, err := rows.Values()
 		if err != nil {
@@ -335,7 +335,7 @@ func query(e *EndpointConfig, w io.Writer) (uint64, error) {
 		if e.RowFormat == "array" {
 			row = values
 		} else {
-			m := make(map[string]any)
+			m := make(map[string]any, len(columns))
 			for i, v := range values {
 				m[columns[i]] = v
 			}
@@ -349,16 +349,15 @@ func query(e *EndpointConfig, w io.Writer) (uint64, error) {
 		if first {
 			first = false
 		} else {
-			fmt.Fprintln(w, ",")
+			io.WriteString(w, ",\n")
 		}
-		fmt.Fprint(w, "  ")
-		fmt.Fprint(w, string(j))
+		io.WriteString(w, "  ")
+		w.Write(j)
 	}
 	if err := rows.Err(); err != nil {
 		return 0, fmt.Errorf("query error: %v", err)
 	}
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "]")
+	io.WriteString(w, "\n]\n")
 	return digest.Sum64(), nil
 }
 
