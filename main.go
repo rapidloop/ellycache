@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 RapidLoop, Inc.
+ * Copyright 2026 RapidLoop, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ func printUsage(r io.Writer) {
 }
 
 func printVersion(r io.Writer) {
-	fmt.Fprintf(r, "ellycache %s %s\n(c) RapidLoop, Inc. 2024 * https://github.com/rapidloop/ellycache\n",
+	fmt.Fprintf(r, "ellycache %s %s\n(c) RapidLoop, Inc. 2026 * https://github.com/rapidloop/ellycache\n",
 		version, githead)
 }
 
