@@ -424,7 +424,6 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 	if _, err := io.Copy(w, fr); err != nil {
 		code = http.StatusInternalServerError
 		log.Printf("http: %s: failed to write response: %v", r.URL.Path, err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 }
