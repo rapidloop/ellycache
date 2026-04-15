@@ -243,7 +243,7 @@ func (j *Job) Run() {
 	}
 	newResult.QueriedAt = time.Now().Truncate(time.Second).In(time.UTC).Format(http.TimeFormat)
 	newResult.CacheControl = fmt.Sprintf("max-age=%d, immutable",
-		int(crond.Entry(j.entryID).Next.Sub(time.Now()).Seconds()))
+		max(0, int(crond.Entry(j.entryID).Next.Sub(time.Now()).Seconds())))
 
 	// update cache, cleanup old entry if present
 	oldResult, loaded := cache.Swap(j.endpoint.Path, newResult)
