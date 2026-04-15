@@ -9,7 +9,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/ovh/symmecrypt v0.6.1
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/pflag v1.0.10
 )
 
 require (

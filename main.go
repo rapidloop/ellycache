@@ -71,13 +71,16 @@ const (
 )
 
 func printUsage(r io.Writer) {
-	fmt.Fprintf(os.Stderr, `Usage: ellycache [-e] [-v] [-h] [config-file]
+	fmt.Fprintf(r, `Usage: ellycache [-e] [-v] [-h] [config-file]
 
   ellycache -e > cache.cfg  # write an example config to cache.cfg
   ellycache cache.cfg       # start ellycache with cache.cfg config file
 
 `)
+	w := pflag.CommandLine.Output()
+	pflag.CommandLine.SetOutput(r)
 	pflag.PrintDefaults()
+	pflag.CommandLine.SetOutput(w)
 	fmt.Fprintln(r)
 	printVersion(r)
 }
