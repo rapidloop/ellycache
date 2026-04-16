@@ -48,10 +48,17 @@ func (c *Config) Validate() error {
 	if len(c.Endpoints) == 0 {
 		return errors.New("no endpoints defined")
 	}
+	nHealth := 0
 	for _, e := range c.Endpoints {
 		if err := e.Validate(); err != nil {
 			return err
 		}
+		if e.Type == "health" {
+			nHealth++
+		}
+	}
+	if nHealth > 1 {
+		return errors.New("at most one health endpoint is allowed")
 	}
 	return nil
 }
@@ -79,9 +86,10 @@ func (c *ConnectionConfig) Validate() error {
 
 type EndpointConfig struct {
 	Path       string `hcl:"path,label"`
-	SQL        string `hcl:"sql"`
+	Type       string `hcl:"type,optional"`
+	SQL        string `hcl:"sql,optional"`
 	SQLTimeout string `hcl:"sqltimeout,optional"`
-	Schedule   string `hcl:"schedule"`
+	Schedule   string `hcl:"schedule,optional"`
 	RowFormat  string `hcl:"rowformat,optional"`
 	FileBacked bool   `hcl:"filebacked,optional"`
 }
@@ -91,6 +99,13 @@ var rxURI = regexp.MustCompile(`^(/(({[A-Za-z0-9_.-]+})|([A-Za-z0-9_.-]+)))+$`)
 func (e *EndpointConfig) Validate() error {
 	if !rxURI.MatchString(e.Path) && e.Path != "/" {
 		return fmt.Errorf("endpoint \"%s\": invalid path: must be set to a valid URI", e.Path)
+	}
+	if e.Type != "" && e.Type != "query" && e.Type != "health" {
+		return fmt.Errorf("endpoint \"%s\": invalid type: must be 'query' or 'health'", e.Path)
+	}
+	if e.Type == "health" {
+		e.SQL, e.SQLTimeout, e.Schedule, e.RowFormat = "", "", "", "" // health endpoint ignores these fields
+		return nil
 	}
 	if strings.TrimSpace(e.SQL) == "" {
 		return fmt.Errorf("endpoint \"%s\": invalid sql: must be set", e.Path)

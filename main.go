@@ -156,6 +156,9 @@ func realmain() int {
 	// start cron
 	crond = cron.New()
 	for _, e := range cfg.Endpoints {
+		if e.Type == "health" {
+			continue
+		}
 		job := &Job{endpoint: &e}
 		if entryID, err := crond.AddJob(e.Schedule, job); err != nil {
 			fmt.Fprintf(os.Stderr, "ellycache: bad schedule \"%s\" in endpoint \"%s\"\n", e.Schedule, e.Path)
@@ -179,7 +182,11 @@ func realmain() int {
 	// configure an http mux with the endpoints, wrap in compress handler
 	mux := http.NewServeMux()
 	for _, e := range cfg.Endpoints {
-		mux.HandleFunc("GET "+e.Path, httpHandler)
+		if e.Type == "health" {
+			mux.HandleFunc("GET "+e.Path, healthHandler)
+		} else {
+			mux.HandleFunc("GET "+e.Path, httpHandler)
+		}
 	}
 	handler := handlers.CompressHandler(mux)
 
@@ -389,6 +396,23 @@ func query(e *EndpointConfig, w io.Writer) (uint64, error) {
 	}
 	io.WriteString(w, "\n]\n")
 	return digest.Sum64(), nil
+}
+
+// healthHandler serves the health endpoint.
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	// form the body json
+	body, _ := json.Marshal(struct {
+		Status  string `json:"status"`
+		Version string `json:"version"`
+		GitHead string `json:"githead"`
+	}{Status: "ok", Version: version, GitHead: githead})
+
+	// write it out
+	hdr := w.Header()
+	hdr.Set("Content-Type", "application/json")
+	hdr.Set("Content-Length", strconv.Itoa(len(body)))
+	hdr.Set("Cache-Control", "no-cache, no-store")
+	w.Write(body)
 }
 
 // httpHandler serves up content for an endpoint.
