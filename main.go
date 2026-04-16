@@ -28,6 +28,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -271,8 +272,9 @@ func (j *Job) Run() {
 		return
 	}
 	newResult.QueriedAt = time.Now().Truncate(time.Second).In(time.UTC).Format(http.TimeFormat)
-	newResult.CacheControl = fmt.Sprintf("max-age=%d, immutable",
-		max(0, int(crond.Entry(j.entryID).Next.Sub(time.Now()).Seconds())))
+	newResult.CacheControl = "max-age=" +
+		strconv.Itoa(max(0, int(time.Until(crond.Entry(j.entryID).Next).Seconds()))) +
+		", immutable"
 
 	// update cache, cleanup old entry if present
 	oldResult, loaded := cache.Swap(j.endpoint.Path, newResult)
@@ -305,7 +307,7 @@ func makeResult(e *EndpointConfig) (*EndpointResult, error) {
 				os.Remove(f.Name())
 				return nil, err
 			} else {
-				return &EndpointResult{ETag: fmt.Sprintf(`W/"%x"`, h), File: f.Name()}, nil
+				return &EndpointResult{ETag: `W/"` + strconv.FormatUint(h, 16) + `"`, File: f.Name()}, nil
 			}
 		}
 	}
@@ -314,7 +316,7 @@ func makeResult(e *EndpointConfig) (*EndpointResult, error) {
 	if h, err := query(e, b); err != nil {
 		return nil, err
 	} else {
-		return &EndpointResult{ETag: fmt.Sprintf(`W/"%x"`, h), Result: b.Bytes()}, nil
+		return &EndpointResult{ETag: `W/"` + strconv.FormatUint(h, 16) + `"`, Result: b.Bytes()}, nil
 	}
 }
 
@@ -345,8 +347,10 @@ func query(e *EndpointConfig, w io.Writer) (uint64, error) {
 
 	var columns []string
 	if e.RowFormat != "array" {
-		for _, fd := range rows.FieldDescriptions() {
-			columns = append(columns, fd.Name)
+		fds := rows.FieldDescriptions()
+		columns = make([]string, len(fds))
+		for i, fd := range fds {
+			columns[i] = fd.Name
 		}
 	}
 
@@ -424,6 +428,7 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 	// serve from memory
 	if result.File == "" {
 		hdr.Set("Content-Type", "application/json")
+		hdr.Set("Content-Length", strconv.Itoa(len(result.Result)))
 		sethdr()
 		w.Write(result.Result)
 		return
