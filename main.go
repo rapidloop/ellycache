@@ -71,6 +71,7 @@ const (
 	defaultListen   = ":8080" // default value for 'listen' in config
 	defaultMaxConns = 5       // default value for 'maxconns' in config
 	shutdownTimeout = 10 * time.Second
+	writeTimeout    = 10 * time.Second
 )
 
 func printUsage(r io.Writer) {
@@ -187,8 +188,9 @@ func realmain() int {
 		listen = defaultListen
 	}
 	srv := &http.Server{
-		Addr:    listen,
-		Handler: handler,
+		Addr:         listen,
+		Handler:      handler,
+		WriteTimeout: writeTimeout,
 	}
 	errch := make(chan error, 1)
 	go func() {
@@ -245,12 +247,15 @@ type Job struct {
 // Run is the cron job handler for an endpoint. If the query is successful, it
 // updates the cache.
 func (j *Job) Run() {
-	// helper to delete old result's file
+	// helper to delete old result's file after a grace period, to allow
+	// in-flight http handlers to finish reading from the file
 	cleanOld := func(oldResult *EndpointResult) {
 		if oldResult.File != "" {
-			if err := os.Remove(oldResult.File); err != nil {
-				log.Printf("warning: failed to remove file %s: %v", oldResult.File, err)
-			}
+			time.AfterFunc(2*writeTimeout, func() {
+				if err := os.Remove(oldResult.File); err != nil {
+					log.Printf("warning: failed to remove file %s: %v", oldResult.File, err)
+				}
+			})
 		}
 	}
 
